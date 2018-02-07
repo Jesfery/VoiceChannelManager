@@ -45,13 +45,9 @@ function updateChannelGame (channel) {
     }
 
     channel.members.forEach(member => {
-        //console.log(member.displayName);
-
         var name = get(member, 'presence.game.name');
 
         if (name && name !== '') {
-            //console.log(name);
-
             if (games[name] !== undefined) {
                 games[name]++;
             } else {
@@ -63,8 +59,6 @@ function updateChannelGame (channel) {
 
     for (var n in games) {
         if (games.hasOwnProperty(n)) {
-            //console.log(n + ': ' + games[n]);
-
             if (games[n] > max) {
                 max = games[n];
                 gameName = n;
