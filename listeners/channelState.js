@@ -20,7 +20,7 @@ function updateChannelGame (channel) {
     channel.members.forEach(member => {
         console.log(member.displayName);
 
-        let name = presence.game.name;
+        let name = member.presence && member.presence.game && member.presence.game.name;
 
         if (name && name !== '') {
             console.log(name);
