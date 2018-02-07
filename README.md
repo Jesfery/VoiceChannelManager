@@ -1,5 +1,4 @@
-# VoiceChannelManager
-Discord Voice Channel Manager
+# Discord Voice Channel Manager
 
 Simple discord.js bot to manage Voice Channels.
 
