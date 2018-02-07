@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "github:hydrabolt/discord.js"
+    "discord.js": "^11.3.0"
   }
 }
