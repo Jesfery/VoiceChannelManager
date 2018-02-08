@@ -34,7 +34,7 @@ module.exports = {
             });
 
             if (userCount > 1) {
-                utils.voteOn('Set user limit of ' + voiceChannel.name + ' to ' + maxInt + '? Please vote using the reactions below.', message.channel, {
+                utils.vote('Set user limit of ' + voiceChannel.name + ' to ' + maxInt + '? Please vote using the reactions below.', message.channel, {
                     targetUsers: targetUsers,
                     time: 10000
                 }).then(results => {

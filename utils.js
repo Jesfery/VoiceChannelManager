@@ -15,7 +15,7 @@ module.exports = {
         }, obj);
     },
 
-    voteOn: function(subject, channel, options) {
+    vote: function(subject, channel, options) {
         let {
             selections = [{
                 name: 'agree',
