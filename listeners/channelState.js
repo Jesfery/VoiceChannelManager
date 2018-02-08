@@ -57,7 +57,7 @@ module.exports = {
                 return canActOn(channel);
             }).forEach(channel => {
                 let restUserLimit = channel.members.size === 0;
-                updateChannelActivity(channel).then(() => {
+                updateChannelActivity(channel).then((channel) => {
                     if (restUserLimit) {
                         resetUserLimit(channel);
                     }
