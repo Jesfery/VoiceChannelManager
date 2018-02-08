@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-const vote = require('../vote.js');
+const utils = require('../utils.js');
 
 module.exports = {
 	name: 'setmax',
@@ -34,8 +34,9 @@ module.exports = {
             });
 
             if (userCount > 1) {
-                vote.voteOn('Set user limit of ' + voiceChannel.name + ' to ' + maxInt + '? Please vote using the reactions below.', message.channel, {
-                    targetUsers: targetUsers
+                utils.voteOn('Set user limit of ' + voiceChannel.name + ' to ' + maxInt + '? Please vote using the reactions below.', message.channel, {
+                    targetUsers: targetUsers,
+                    time: 10000
                 }).then(results => {
                     if (((results.agree.count + 1) / userCount) > 0.5) { //+1 for requesting user
                         voiceChannel.edit({
@@ -43,8 +44,9 @@ module.exports = {
                         }).then(() => {
                             resolve('New userLimit set');
                         });
+                    } else {
+                        resolve('Request rejected by channel members');
                     }
-                    resolve('Request rejected by channel members');
                 });
             } else {
                 voiceChannel.edit({
