@@ -2,7 +2,31 @@
 
 const Discord = require('discord.js');
 const fs = require('fs');
-const { prefix } = require('../config.json');
+const { prefix, categories } = require('../config.json');
+
+function canActOn(channel) {
+    let guildId,
+        parentId,
+        guildCategories;
+
+    if (channel.type === 'dm') {
+        return true;
+    }
+
+    guildId = channel.guild.id;
+    parentId = channel.parentID;
+    guildCategories = categories[guildId];
+
+    if (!guildCategories) {
+        return false;
+    }
+
+    if(!parentId || guildCategories.indexOf(parentId) === -1) {
+        return false;
+    }
+
+    return channel.type === 'text';
+}
 
 module.exports = {
     init: function(client) {
@@ -19,7 +43,7 @@ module.exports = {
         const cooldowns = new Discord.Collection();
 
         client.on('message', message => {
-            if (!message.content.startsWith(prefix) || message.author.bot) return;
+            if (!message.content.startsWith(prefix) || message.author.bot || !canActOn(message.channel)) return;
         
             const args = message.content.slice(prefix.length).split(/\s+/);
             const commandName = args.shift().toLowerCase();

@@ -1,9 +1,22 @@
 /*jshint esversion: 6 */
 
 const utils = require('../utils.js');
+const { categories } = require('../config.json');
 
 function canActOn(channel) {
-    return channel.type === 'voice' && channel.name.indexOf('Voice #') === 0;
+    let guildId = channel.guild.id,
+        parentId = channel.parentID,
+        guildCategories = categories[guildId];
+
+    if (!guildCategories) {
+        return false;
+    }
+
+    if(!parentId || guildCategories.indexOf(parentId) === -1) {
+        return false;
+    }
+
+    return channel.type === 'voice';
 }
 
 function resetUserLimit(voiceChannel) {
@@ -56,9 +69,9 @@ module.exports = {
             guild.channels.filter(channel => {
                 return canActOn(channel);
             }).forEach(channel => {
-                let restUserLimit = channel.members.size === 0;
+                let channelEmptied = channel.members.size === 0;
                 updateChannelActivity(channel).then((channel) => {
-                    if (restUserLimit) {
+                    if (channelEmptied) {
                         resetUserLimit(channel);
                     }
                 });
@@ -68,17 +81,22 @@ module.exports = {
         client.on('voiceStateUpdate', (oldMember, newMember) => {
             let newUserChannel = newMember.voiceChannel,
                 oldUserChannel = oldMember.voiceChannel,
-                restUserLimit = utils.get(oldUserChannel, 'members.size') === 0;
+                channelEmptied,
+                channelOccupied;
         
             if(oldUserChannel !== undefined && canActOn(oldUserChannel)) {
-                updateChannelActivity(oldUserChannel).then(() => {
-                    if (restUserLimit) {
-                        resetUserLimit(oldUserChannel);
+                channelEmptied = utils.get(oldUserChannel, 'members.size') === 0;
+                updateChannelActivity(oldUserChannel).then((channel) => {
+                    if (channelEmptied) {
+                        resetUserLimit(channel);
                     }
                 });
             } 
             if(newUserChannel !== undefined && canActOn(newUserChannel)){
-                updateChannelActivity(newUserChannel);
+                channelOccupied = utils.get(newUserChannel, 'members.size') === 1;
+                updateChannelActivity(newUserChannel).then(() => {
+
+                });
             }
         });
         
