@@ -32,8 +32,6 @@ function updateChannelActivity (channel) {
 
     for (let n in activities) {
         if (activities.hasOwnProperty(n)) {
-            console.log(n + ': ' + activities[n]);
-
             if (activities[n] > max) {
                 max = activities[n];
                 activityName = n;
