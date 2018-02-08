@@ -61,6 +61,34 @@ function updateChannelActivity (channel) {
 	return channel.setName(channelName);
 }
 
+function deleteChannel(channel) {
+    let category = channel.parent;
+    channel.delete().then(() => {
+        ensureOneEmptyChannel(category);
+    });
+}
+
+function ensureOneEmptyChannel(category) {
+    let guild = category.guild,
+        voiceChannels,
+        emptyChannels;
+
+    voiceChannels = category.children.filter((channel) => {
+        return channel.type === 'voice';
+    });
+
+    emptyChannels = voiceChannels.filter((channel) => {
+        return utils.get(channel, 'members.size') === 0;
+    });
+
+    if (emptyChannels.size === 0) {
+        guild.channels.create('Voice #' + (voiceChannels.size + 1), {
+            type: 'voice',
+            parent: category
+        });
+    }
+}
+
 module.exports = {
     init: function(client) {
 
@@ -86,16 +114,19 @@ module.exports = {
         
             if(oldUserChannel !== undefined && canActOn(oldUserChannel)) {
                 channelEmptied = utils.get(oldUserChannel, 'members.size') === 0;
-                updateChannelActivity(oldUserChannel).then((channel) => {
-                    if (channelEmptied) {
-                        resetUserLimit(channel);
-                    }
-                });
+                if (channelEmptied) {
+                    //This might be overkill, but its a good place to start.
+                    deleteChannel(oldUserChannel);
+                } else {
+                    updateChannelActivity(oldUserChannel);
+                }
             } 
             if(newUserChannel !== undefined && canActOn(newUserChannel)){
                 channelOccupied = utils.get(newUserChannel, 'members.size') === 1;
-                updateChannelActivity(newUserChannel).then(() => {
-
+                updateChannelActivity(newUserChannel).then(channel => {
+                    if (channelOccupied) {
+                        ensureOneEmptyChannel(channel.parent);
+                    }
                 });
             }
         });
