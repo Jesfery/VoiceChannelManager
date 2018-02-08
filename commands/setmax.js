@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 const vote = require('../vote.js');
 
 module.exports = {
@@ -38,12 +40,17 @@ module.exports = {
                     if (((results.agree.count + 1) / userCount) > 0.5) { //+1 for requesting user
                         voiceChannel.edit({
                             userLimit: maxInt
+                        }).then(() => {
+                            resolve('New userLimit set');
                         });
                     }
+                    resolve('Request rejected by channel members');
                 });
             } else {
                 voiceChannel.edit({
                     userLimit: maxInt
+                }).then(() => {
+                    resolve('New userLimit set');
                 });
             }
         });

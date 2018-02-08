@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 const { prefix } = require('../config.json');
 
 module.exports = {
@@ -6,6 +8,7 @@ module.exports = {
 	aliases: ['commands'],
 	usage: '[command name]',
 	cooldown: 5,
+	
 	execute(message, args) {
 		const { commands } = message.client;
 		const data = [];
@@ -31,12 +34,12 @@ module.exports = {
 			data.push(`**Cooldown:** ${command.cooldown || 3} second(s)`);
 		}
 
-		message.author.send(data, { split: true })
+		return message.author.send(data, { split: true })
 			.then(() => {
 				if (message.channel.type !== 'dm') {
 					message.channel.send('I\'ve sent you a DM with all my commands!');
 				}
 			})
 			.catch(() => message.reply('it seems like I can\'t DM you!'));
-	},
+	}
 };

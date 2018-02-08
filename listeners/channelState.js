@@ -1,46 +1,42 @@
+/*jshint esversion: 6 */
+
+const utils = require('../utils.js');
+
+function canActOn(channel) {
+    return channel.type === 'voice' && channel.name.indexOf('Voice #') === 0;
+}
+
 function resetUserLimit(voiceChannel) {
-    if (voiceChannel.type !== 'voice' || voiceChannel.name.indexOf('Voice #') === -1) {
-        return;
-	}
-	
 	voiceChannel.edit({
         userLimit: 0
     });
 }
 
-
-function updateChannelGame (channel) {
-    let games = {},
-        max = 0, gameName, channelName;
-
-    if (channel.type !== 'voice' || channel.name.indexOf('Voice #') === -1) {
-        return;
-    }
+function updateChannelActivity (channel) {
+    let activities = {},
+        max = 0, activityName, channelName;
 
     channel.members.forEach(member => {
-        console.log(member.displayName);
-
-        let name = member.presence && member.presence.game && member.presence.game.name;
+        let activiy = utils.get(member, 'presence.activity'),
+            name = utils.get(activiy, 'name');
 
         if (name && name !== '') {
-            console.log(name);
-
-            if (games[name] !== undefined) {
-                games[name]++;
+            if (activities[name] !== undefined) {
+                activities[name]++;
             } else {
-                games[name] = 1;                
+                activities[name] = 1;                
             }
         }
 
     });
 
-    for (let n in games) {
-        if (games.hasOwnProperty(n)) {
-            console.log(n + ': ' + games[n]);
+    for (let n in activities) {
+        if (activities.hasOwnProperty(n)) {
+            console.log(n + ': ' + activities[n]);
 
-            if (games[n] > max) {
-                max = games[n];
-                gameName = n;
+            if (activities[n] > max) {
+                max = activities[n];
+                activityName = n;
             }
         }
     }
@@ -48,10 +44,10 @@ function updateChannelGame (channel) {
     channelName = channel.name.split('(')[0].trim();
 
     if (max > 0) {
-        channelName = channelName + ' (' + gameName + ')';
+        channelName = channelName + ' (' + activityName + ')';
     }
 
-	channel.setName(channelName);
+	return channel.setName(channelName);
 }
 
 module.exports = {
@@ -60,37 +56,42 @@ module.exports = {
         //Update channel state at startup
         client.guilds.forEach(guild => {
             guild.channels.filter(channel => {
-                return channel.type === 'voice';
+                return canActOn(channel);
             }).forEach(channel => {
-                updateChannelGame(channel);
+                let restUserLimit = channel.members.size === 0;
+                updateChannelActivity(channel).then(() => {
+                    if (restUserLimit) {
+                        resetUserLimit(channel);
+                    }
+                });
             });
-
         });
 
         client.on('voiceStateUpdate', (oldMember, newMember) => {
             let newUserChannel = newMember.voiceChannel,
-                oldUserChannel = oldMember.voiceChannel;
+                oldUserChannel = oldMember.voiceChannel,
+                restUserLimit = utils.get(oldUserChannel, 'members.size') === 0;
         
-            if(oldUserChannel !== undefined) {
-                updateChannelGame(oldUserChannel);
-                if (oldUserChannel.members.size === 0) {
-                    resetUserLimit(oldUserChannel);
-                }
+            if(oldUserChannel !== undefined && canActOn(oldUserChannel)) {
+                updateChannelActivity(oldUserChannel).then(() => {
+                    if (restUserLimit) {
+                        resetUserLimit(oldUserChannel);
+                    }
+                });
             } 
-            if(newUserChannel !== undefined){
-                updateChannelGame(newUserChannel);
+            if(newUserChannel !== undefined && canActOn(newUserChannel)){
+                updateChannelActivity(newUserChannel);
             }
         });
         
         client.on('presenceUpdate', (oldMember, newMember) => {
-            let newUserGame = newMember.presence.game,
-                oldUserGame = oldMember.presence.game,
+            let newUserActivity = utils.get(newMember, 'presence.activity'),
+                oldUserActivity = utils.get(oldMember, 'presence.activity'),
                 newUserChannel = newMember.voiceChannel;
         
-            if (newUserChannel && (!newUserGame || !oldUserGame || !newUserGame.equals(oldUserGame))) {
-                updateChannelGame(newUserChannel);
+            if (newUserChannel && (!newUserActivity || !oldUserActivity || !newUserActivity.equals(oldUserActivity)) && canActOn(newUserChannel)) {
+                updateChannelActivity(newUserChannel);
             }
         });        
-        
     }
 };

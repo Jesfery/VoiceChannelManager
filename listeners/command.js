@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 const Discord = require('discord.js');
 const fs = require('fs');
 const { prefix } = require('../config.json');
@@ -65,7 +67,11 @@ module.exports = {
             }
         
             try {
-                command.execute(message, args).catch(err => {
+                command.execute(message, args).then(resp => {
+                    if (typeof resp === 'string') {
+                        message.channel.send(resp);
+                    }
+                }).catch(err => {
                     message.reply('there was an error trying to execute that command!');
                     console.log(err);    
                 });
