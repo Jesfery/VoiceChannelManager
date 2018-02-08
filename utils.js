@@ -58,6 +58,7 @@ function vote(subject, channel, options) {
                 if (index < selections.length) {
                     //React to message with available options
                     message.react(selections[index].emoji).then(cb);
+                    index++;
                 } else {
                     //Wait the configured time for user reactions.
                     // Only accept requested reactions from targeted users.
@@ -99,7 +100,6 @@ function vote(subject, channel, options) {
                         resolve(results);
                     });
                 }
-                index++;
             })();
         });
     });
