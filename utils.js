@@ -15,7 +15,7 @@ function get(obj, key) {
 }
 
 /**
- * Calls a vote in a text channel. Needs to be tidied. Investigate Async/Await.
+ * Calls a vote in a text channel. Could be tidied a bit. Investigate Async/Await?
  * 
  * @param {String} subject The subject to be voted on
  * @param {TextChannel} channel The text channel to run the vote in
@@ -38,6 +38,7 @@ function vote(subject, channel, options) {
         targetUsers
     } = options;
 
+    //Alert target users via mentions
     if (targetUsers && targetUsers.length > 0) {
         let mentions = [];
 
@@ -55,35 +56,42 @@ function vote(subject, channel, options) {
 
             (function cb() {
                 if (index < selections.length) {
+                    //React to message with available options
                     message.react(selections[index].emoji).then(cb);
                 } else {
-                    message.awaitReactions(function(reaction) {
-                        return selections.findIndex(function(selection) {
+                    //Wait the configured time for user reactions.
+                    // Only accept requested reactions from targeted users.
+                    message.awaitReactions((reaction, user) => {
+                        let include = selections.findIndex((selection) => {
                             return reaction.emoji.name === selection.emoji;
                         }) !== -1;
+
+                        if (targetUsers && targetUsers.length > 0) {
+                            include = include && targetUsers.findIndex((targetUser) => {
+                                return targetUser.id === user.id;
+                            }) !== -1;
+                        }
+
+                        return include;
                     }, {
                         time: time
-                    }).then(function tallyResults(reactions) {
+                    }).then(function (reactions) {
+                        //Tally reactions, then resolve the vote promise with the results
                         let results = {};
 
                         selections.forEach(function(selection) {
-                            let result = {
-                                count: 0,
-                                users: []
-                            };
-                            let reaction = reactions.get(selection.emoji);
+                            let reaction = reactions.get(selection.emoji),
+                                result = {
+                                    count: 0,
+                                    users: []
+                                };
 
-                            reaction && reaction.users.forEach(function(user) {
-                                if (targetUsers && targetUsers.length > 0) {
-                                    if (targetUsers.findIndex(function(targetUser) {
-                                        return targetUser.id === user.id;
-                                    }) === -1) {
-                                        return;
-                                    }
-                                }
-                                result.count++;
-                                result.users.push(user);
-                            });
+                            if (reaction) {
+                                reaction.users.forEach(function(user) {
+                                    result.count++;
+                                    result.users.push(user);
+                                });
+                            }
 
                             results[selection.name] = result;
                         });
@@ -93,9 +101,7 @@ function vote(subject, channel, options) {
                 }
                 index++;
             })();
-
         });
-
     });
 }
 
