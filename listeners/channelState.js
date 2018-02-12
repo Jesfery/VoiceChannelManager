@@ -19,13 +19,62 @@ function canActOn(channel) {
     return channel.type === 'voice';
 }
 
-function resetUserLimit(voiceChannel) {
-	voiceChannel.edit({
-        userLimit: 0
+function manageChannels(category) {
+    let guild = category.guild,
+        voiceChannels,
+        emptyVoiceChannels,
+        promises;
+
+    voiceChannels = category.children.filter(channel => {
+        return channel.type === 'voice';
     });
+
+    emptyVoiceChannels = voiceChannels.filter(channel => {
+        return channel.members.size === 0;
+    });
+
+    console.log('emptyVoiceChannels.size => ' + emptyVoiceChannels.size);
+    console.log('voiceChannels.size 1. => ' + voiceChannels.size);
+
+    //Ensure one empty channel
+    promises = [];
+    if (emptyVoiceChannels.size > 0) {
+        emptyVoiceChannels.forEach(channel => {
+            if (channel.id === emptyVoiceChannels.first().id) {
+                /*promises.push(channel.edit({
+                    userLimit: 0
+                }));*/
+                channel.userLimit = 0;
+            } else {
+                promises.push(channel.delete('auto management'));
+                //voiceChannels.delete(channel.id);
+            }
+        });
+    } else if (emptyVoiceChannels.size === 0) {
+        promises.push(guild.channels.create('Voice', {
+            type: 'voice',
+            parent: category
+        }));
+    }
+
+    Promise.all(promises).then(() => {
+        let index = 1;
+
+        voiceChannels = category.children.filter(channel => {
+            return channel.type === 'voice';
+        });
+
+        console.log('voiceChannels.size 2. => ' + voiceChannels.size);
+
+        voiceChannels.forEach(channel => {
+            channel.setName(getChannelName(channel, index));
+            index++;
+        });
+    });
+
 }
 
-function updateChannelActivity (channel) {
+function getChannelName(channel, index) {
     let activities = {},
         max = 0, activityName, channelName;
 
@@ -52,41 +101,17 @@ function updateChannelActivity (channel) {
         }
     }
 
-    channelName = channel.name.split('(')[0].trim();
+    if (index === undefined) {
+        channelName = channel.name.split('(')[0].trim();
+    } else {
+        channelName = 'Voice #' + index;
+    }
 
     if (max > 0) {
         channelName = channelName + ' (' + activityName + ')';
     }
 
-	return channel.setName(channelName);
-}
-
-function deleteChannel(channel) {
-    let category = channel.parent;
-    channel.delete().then(() => {
-        ensureOneEmptyChannel(category);
-    });
-}
-
-function ensureOneEmptyChannel(category) {
-    let guild = category.guild,
-        voiceChannels,
-        emptyChannels;
-
-    voiceChannels = category.children.filter((channel) => {
-        return channel.type === 'voice';
-    });
-
-    emptyChannels = voiceChannels.filter((channel) => {
-        return utils.get(channel, 'members.size') === 0;
-    });
-
-    if (emptyChannels.size === 0) {
-        guild.channels.create('Voice #' + (voiceChannels.size + 1), {
-            type: 'voice',
-            parent: category
-        });
-    }
+	return channelName;
 }
 
 module.exports = {
@@ -95,39 +120,27 @@ module.exports = {
         //Update channel state at startup
         client.guilds.forEach(guild => {
             guild.channels.filter(channel => {
-                return canActOn(channel);
-            }).forEach(channel => {
-                let channelEmptied = channel.members.size === 0;
-                updateChannelActivity(channel).then((channel) => {
-                    if (channelEmptied) {
-                        resetUserLimit(channel);
-                    }
-                });
+                let guildCategories = categories[guild.id];
+                return guildCategories && guildCategories.indexOf(channel.id) !== -1;
+            }).forEach(category => {
+                manageChannels(category);
             });
         });
 
         client.on('voiceStateUpdate', (oldMember, newMember) => {
             let newUserChannel = newMember.voiceChannel,
                 oldUserChannel = oldMember.voiceChannel,
-                channelEmptied,
-                channelOccupied;
+                oldCategoryID,
+                newCategory;
         
-            if(oldUserChannel !== undefined && canActOn(oldUserChannel)) {
-                channelEmptied = utils.get(oldUserChannel, 'members.size') === 0;
-                if (channelEmptied) {
-                    //This might be overkill, but its a good place to start.
-                    deleteChannel(oldUserChannel);
-                } else {
-                    updateChannelActivity(oldUserChannel);
-                }
+            if(oldUserChannel !== undefined && canActOn(oldUserChannel) && (newUserChannel === undefined || !newUserChannel.equals(oldUserChannel))) {
+                oldCategoryID = oldUserChannel.parentID;
+                manageChannels(oldUserChannel.parent);
             } 
-            if(newUserChannel !== undefined && canActOn(newUserChannel)){
-                channelOccupied = utils.get(newUserChannel, 'members.size') === 1;
-                updateChannelActivity(newUserChannel).then(channel => {
-                    if (channelOccupied) {
-                        ensureOneEmptyChannel(channel.parent);
-                    }
-                });
+            if(newUserChannel !== undefined && canActOn(newUserChannel) && (oldUserChannel === undefined || !newUserChannel.equals(oldUserChannel))){
+                if (oldCategoryID !== newUserChannel.parentID) {
+                    manageChannels(newUserChannel.parent);
+                }
             }
         });
         
@@ -137,7 +150,7 @@ module.exports = {
                 newUserChannel = newMember.voiceChannel;
         
             if (newUserChannel && (!newUserActivity || !oldUserActivity || !newUserActivity.equals(oldUserActivity)) && canActOn(newUserChannel)) {
-                updateChannelActivity(newUserChannel);
+                newUserChannel.setName(getChannelName(newUserChannel));
             }
         });        
     }
