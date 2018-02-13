@@ -14,7 +14,7 @@ Dynamic command handling is based on https://github.com/discordjs/guide/tree/mas
 
 Guilds and categories can be configured via the config.json "categories" property. The structure of the property should look like;
 
-```json
+```javascript
 "categories": {
     "guild-id-1": [
         "catergory-id-1",
