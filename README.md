@@ -12,4 +12,22 @@ Dynamic command handling is based on https://github.com/discordjs/guide/tree/mas
 
 ### Configuration
 
-TODO
+Guilds and categories can be configured via the config.json "categories" property. The structure of the property should look like;
+
+```json
+"categories": {
+    "guild-id-1": [
+        "catergory-id-1",
+        "catergory-id-2",
+        ...
+    ],
+    "guild-id-2": [
+        "catergory-id-1",
+        "catergory-id-2",
+        ...
+    ],
+    ...
+}
+```
+
+
