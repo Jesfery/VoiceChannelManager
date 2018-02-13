@@ -10,7 +10,17 @@ Can be configured to manage voice channels in a number of categories in the foll
 
 Dynamic command handling is based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
 
-### Configuration
+### Configuration (config.json)
+
+##### "prefix"
+
+The prefix that the command listener will respond to (default is '!')
+
+##### "token"
+
+The app bot user token. Found in the Discord application console - https://discordapp.com/developers/applications/me/
+
+##### "categories"
 
 Guilds and categories can be configured via the config.json "categories" property. The structure of the property should look like;
 
