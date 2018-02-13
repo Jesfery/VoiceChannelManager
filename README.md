@@ -27,13 +27,13 @@ Guilds and categories can be configured via the config.json "categories" propert
 ```javascript
 "categories": {
     "guild-id-1": [
-        "catergory-id-1",
-        "catergory-id-2",
+        "category-id-1",
+        "category-id-2",
         //...
     ],
     "guild-id-2": [
-        "catergory-id-1",
-        "catergory-id-2",
+        "category-id-1",
+        "category-id-2",
         //...
     ],
     //...
