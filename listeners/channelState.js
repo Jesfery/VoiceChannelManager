@@ -79,9 +79,13 @@ function manageChannels(category) {
         //console.log('voiceChannels.size 2. => ' + voiceChannels.size);
 
         voiceChannels.forEach(channel => {
-            channel.setName(getChannelName(channel, index));
+            channel.setName(getChannelName(channel, index)).catch(() => {
+                //For some reason this list collection sometimes doesn't update after the Promises have been resolved,
+                // so some of the channels have been deleted. The catch is a bit of a hack. I'll look into a better 
+                // solution.
+            });
             index++;
-        }).catch(() => {});
+        });
     });
 
 }
