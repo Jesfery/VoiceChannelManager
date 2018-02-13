@@ -90,7 +90,7 @@ function manageChannels(category) {
  * Gets the name for a channel based on the activity of it's members
  * 
  * @param {VoiceChannel} channel The voice channel
- * @param {Number} index The index of the channel passed. If not passed the, current name will be used
+ * @param {Number} [index] The index of the channel passed. If not passed the, current name will be used
  */
 function getChannelName(channel, index) {
     let activities = {},

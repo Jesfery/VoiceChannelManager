@@ -18,9 +18,9 @@ function get(obj, key) {
  * @param {String} subject The subject to be voted on
  * @param {TextChannel} channel The text channel to run the vote in
  * @param {Object} options Vote options
- * @param {Array} options.selections The available selections. Defaults to agree/disagree
- * @param {Number} options.time Time to listen for reactions in ms. Defaults to 5 seconds.
- * @param {Array} options.targetUsers Users to limit the vote to.
+ * @param {Array} [options.selections] The available selections. Defaults to agree/disagree
+ * @param {Number} [options.time] Time to listen for reactions in ms. Defaults to 5 seconds.
+ * @param {Array} [options.targetUsers] Users to limit the vote to.
  * 
  */
 function vote(subject, channel, options) {
