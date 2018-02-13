@@ -1,8 +1,11 @@
-/*jshint esversion: 6 */
-
 const utils = require('../utils.js');
 const { categories } = require('../config.json');
 
+/**
+ * Checks to see if the voice channel is a child of one of the configured categories
+ * 
+ * @param {VoiceChannel} channel the voice channel
+ */
 function canActOn(channel) {
     let guildId = channel.guild.id,
         parentId = channel.parentID,
@@ -19,6 +22,15 @@ function canActOn(channel) {
     return channel.type === 'voice';
 }
 
+/**
+ * Manages the voice channels in a category by
+ *  Ensuring that there is always one empty voice channel.
+ *  Resetting vacated voice channels
+ *  Naming occupied voice channels in accordance with the activity of the
+ *   majority of occupants.
+ * 
+ * @param {CategoryChannel} category The category
+ */
 function manageChannels(category) {
     let guild = category.guild,
         voiceChannels,
@@ -33,8 +45,8 @@ function manageChannels(category) {
         return channel.members.size === 0;
     });
 
-    console.log('emptyVoiceChannels.size => ' + emptyVoiceChannels.size);
-    console.log('voiceChannels.size 1. => ' + voiceChannels.size);
+    //console.log('emptyVoiceChannels.size => ' + emptyVoiceChannels.size);
+    //console.log('voiceChannels.size 1. => ' + voiceChannels.size);
 
     //Ensure one empty channel
     promises = [];
@@ -64,23 +76,29 @@ function manageChannels(category) {
             return channel.type === 'voice';
         });
 
-        console.log('voiceChannels.size 2. => ' + voiceChannels.size);
+        //console.log('voiceChannels.size 2. => ' + voiceChannels.size);
 
         voiceChannels.forEach(channel => {
             channel.setName(getChannelName(channel, index));
             index++;
-        });
+        }).catch(() => {});
     });
 
 }
 
+/**
+ * Gets the name for a channel based on the activity of it's members
+ * 
+ * @param {VoiceChannel} channel The voice channel
+ * @param {Number} index The index of the channel passed. If not passed the, current name will be used
+ */
 function getChannelName(channel, index) {
     let activities = {},
         max = 0, activityName, channelName;
 
     channel.members.forEach(member => {
-        let activiy = utils.get(member, 'presence.activity'),
-            name = utils.get(activiy, 'name');
+        let activity = utils.get(member, 'presence.activity'),
+            name = utils.get(activity, 'name');
 
         if (name && name !== '') {
             if (activities[name] !== undefined) {
@@ -132,13 +150,15 @@ module.exports = {
                 oldUserChannel = oldMember.voiceChannel,
                 oldCategoryID,
                 newCategory;
-        
+
+            //If a user enters of leaves a configured category, update it.
             if(oldUserChannel !== undefined && canActOn(oldUserChannel) && (newUserChannel === undefined || !newUserChannel.equals(oldUserChannel))) {
                 oldCategoryID = oldUserChannel.parentID;
                 manageChannels(oldUserChannel.parent);
-            } 
+            }
+
             if(newUserChannel !== undefined && canActOn(newUserChannel) && (oldUserChannel === undefined || !newUserChannel.equals(oldUserChannel))){
-                if (oldCategoryID !== newUserChannel.parentID) {
+                if (oldCategoryID !== newUserChannel.parentID) { //No need to manage the same category twice.
                     manageChannels(newUserChannel.parent);
                 }
             }
@@ -150,6 +170,7 @@ module.exports = {
                 newUserChannel = newMember.voiceChannel;
         
             if (newUserChannel && (!newUserActivity || !oldUserActivity || !newUserActivity.equals(oldUserActivity)) && canActOn(newUserChannel)) {
+                //Shouldnt be necessary to manage an entire category when the presence updates.
                 newUserChannel.setName(getChannelName(newUserChannel));
             }
         });        

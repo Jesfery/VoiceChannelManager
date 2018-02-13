@@ -1,5 +1,3 @@
-/*jshint esversion: 6 */
-
 /**
  * Utility function to get a deep property value without all the && this && that malarkey
  * 
@@ -21,7 +19,7 @@ function get(obj, key) {
  * @param {TextChannel} channel The text channel to run the vote in
  * @param {Object} options Vote options
  * @param {Array} options.selections The available selections. Defaults to agree/disagree
- * @param {Number} options.time Time to listen for reactions in ms. Defalts to 5 seconds.
+ * @param {Number} options.time Time to listen for reactions in ms. Defaults to 5 seconds.
  * @param {Array} options.targetUsers Users to limit the vote to.
  * 
  */

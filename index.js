@@ -1,5 +1,3 @@
-/*jshint esversion: 6 */
-
 /**
  * A simple discord.js bot to manage Voice Channels.
  *
