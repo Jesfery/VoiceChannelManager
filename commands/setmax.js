@@ -2,7 +2,7 @@ const utils = require('../utils.js');
 
 module.exports = {
 	name: 'setmax',
-	description: 'Set the maximum number of users that can connect to your voice channel.',
+	description: 'Set the maximum number of users that can connect to your voice channel. \'0\' will reset it.',
     usage: 'maxUsers',
     cooldown: 5,	
     guildOnly: true,
@@ -22,6 +22,11 @@ module.exports = {
         
             if (Number.isNaN(maxInt) || maxInt < 0 || maxInt >= 100) {
                 reject('Invalid user limit: ' + maxInt);
+                return;
+            }
+
+            if (maxInt > 0 && maxInt < userCount) {
+                reject('User limit is lower than the current user count');
                 return;
             }
 
