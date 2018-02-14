@@ -1,7 +1,7 @@
 /**
  * A simple discord.js bot to manage Voice Channels.
  *
- * Comand handling based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
+ * Dynamic command handling based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
  */
 const Discord = require('discord.js');
 const { token } = require('./config.json');
