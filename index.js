@@ -12,9 +12,9 @@ const channelStateListener = require('./listeners/channelState.js');
 const client = new Discord.Client();
 
 client.on('ready', () => {
-    console.log('Ready!');
     commandListener.init(client);
     channelStateListener.init(client);
+    console.log('Ready!');
 });
 
 client.login(token);

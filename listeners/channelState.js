@@ -35,7 +35,8 @@ function manageChannels(category) {
     let guild = category.guild,
         voiceChannels,
         emptyVoiceChannels,
-        promises;
+        promises,
+        createNewChannel = false;
 
     voiceChannels = category.children.filter(channel => {
         return channel.type === 'voice';
@@ -45,47 +46,46 @@ function manageChannels(category) {
         return channel.members.size === 0;
     });
 
-    //console.log('emptyVoiceChannels.size => ' + emptyVoiceChannels.size);
-    //console.log('voiceChannels.size 1. => ' + voiceChannels.size);
-
     //Ensure one empty channel
     promises = [];
     if (emptyVoiceChannels.size > 0) {
         emptyVoiceChannels.forEach(channel => {
             if (channel.id === emptyVoiceChannels.first().id) {
-                /*promises.push(channel.edit({
+                promises.push(channel.edit({
                     userLimit: 0
-                }));*/
+                }));
                 channel.userLimit = 0;
             } else {
                 promises.push(channel.delete('auto management'));
-                //voiceChannels.delete(channel.id);
+                voiceChannels.delete(channel.id);
             }
         });
     } else if (emptyVoiceChannels.size === 0) {
-        promises.push(guild.channels.create('Voice', {
-            type: 'voice',
-            parent: category
-        }));
+        createNewChannel = true;
     }
 
     Promise.all(promises).then(() => {
-        let index = 1;
+        let index = 1,
+            channelName;
 
         voiceChannels = category.children.filter(channel => {
             return channel.type === 'voice';
         });
 
-        //console.log('voiceChannels.size 2. => ' + voiceChannels.size);
-
         voiceChannels.forEach(channel => {
-            channel.setName(getChannelName(channel, index)).catch(() => {
-                //For some reason this list collection sometimes doesn't update after the Promises have been resolved,
-                // so some of the channels have been deleted. The catch is a bit of a hack. I'll look into a better 
-                // solution.
-            });
+            channelName = getChannelName(channel, index);
+            if (channelName !== channel.name) {
+                channel.setName(channelName);
+            }
             index++;
         });
+
+        if (createNewChannel) {
+            guild.channels.create('Voice #' + index, {
+                type: 'voice',
+                parent: category
+            });
+        }
     });
 
 }
@@ -133,7 +133,7 @@ function getChannelName(channel, index) {
         channelName = channelName + ' (' + activityName + ')';
     }
 
-	return channelName;
+    return channelName;
 }
 
 module.exports = {
