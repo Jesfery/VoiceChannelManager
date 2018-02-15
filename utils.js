@@ -13,7 +13,7 @@ function get(obj, key) {
 }
 
 /**
- * Calls a vote in a text channel. Could be tidied a bit. Investigate Async/Await?
+ * Calls a vote in a text channel.
  * 
  * @param {String} subject The subject to be voted on
  * @param {TextChannel} channel The text channel to run the vote in
@@ -50,55 +50,59 @@ function vote(subject, channel, options) {
     return new Promise((resolve, reject) => {
 
         channel.send(subject).then(message => {
-            let index = 0;
+            let promise = new Promise(resolve => {
+                resolve();
+            });
 
-            (function cb() {
-                if (index < selections.length) {
-                    //React to message with available options
-                    message.react(selections[index].emoji).then(cb);
-                    index++;
-                } else {
-                    //Wait the configured time for user reactions.
-                    // Only accept requested reactions from targeted users.
-                    message.awaitReactions((reaction, user) => {
-                        let include = selections.findIndex((selection) => {
-                            return reaction.emoji.name === selection.emoji;
+            selections.forEach(selection => {
+                promise = promise.then(() => {
+                    return message.react(selection.emoji);
+                });
+            });
+
+            promise = promise.then(() => {
+                //Wait the configured time for user reactions.
+                // Only accept requested reactions from targeted users.
+                return message.awaitReactions((reaction, user) => {
+                    let include = selections.findIndex((selection) => {
+                        return reaction.emoji.name === selection.emoji;
+                    }) !== -1;
+
+                    if (targetUsers && targetUsers.length > 0) {
+                        include = include && targetUsers.findIndex((targetUser) => {
+                            return targetUser.id === user.id;
                         }) !== -1;
+                    }
 
-                        if (targetUsers && targetUsers.length > 0) {
-                            include = include && targetUsers.findIndex((targetUser) => {
-                                return targetUser.id === user.id;
-                            }) !== -1;
-                        }
+                    return include;
+                }, {
+                    time: time
+                });
+            });
 
-                        return include;
-                    }, {
-                        time: time
-                    }).then(function (reactions) {
-                        //Tally reactions, then resolve the vote promise with the results
-                        let results = {};
+            promise.then(reactions => {
+                //Tally reactions, then resolve the vote promise with the results
+                let results = {};
 
-                        selections.forEach(function(selection) {
-                            let reaction = reactions.get(selection.emoji),
-                                result = {
-                                    count: 0,
-                                    users: []
-                                };
+                selections.forEach(function(selection) {
+                    let reaction = reactions.get(selection.emoji),
+                        result = {
+                            count: 0,
+                            users: []
+                        };
 
-                            if (reaction) {
-                                reaction.users.forEach(function(user) {
-                                    result.count++;
-                                    result.users.push(user);
-                                });
-                            }
-
-                            results[selection.name] = result;
+                    if (reaction) {
+                        reaction.users.forEach(function(user) {
+                            result.count++;
+                            result.users.push(user);
                         });
+                    }
 
-                        resolve(results);
-                    });
-                }
-            })();
+                    results[selection.name] = result;
+                });
+
+                resolve(results);
+            });
         });
     });
 }
