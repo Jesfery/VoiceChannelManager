@@ -13,20 +13,26 @@ module.exports = {
                 subject = '',
                 voiceChannel = message.member.voiceChannel,
                 targetUsers = [],
-                userCount = voiceChannel.members.size;
-        
+                userCount;
+
             if (voiceChannel === undefined) {
-                reject('User not connected to a voice channel');
+                resolve('User not connected to a voice channel');
+                return;
+            }
+
+            if (voiceChannel.parentID !== message.channel.parentID) {
+                resolve('Cannot manage the voice channel');
                 return;
             }
         
             if (Number.isNaN(maxInt) || maxInt < 0 || maxInt >= 100) {
-                reject('Invalid user limit: ' + maxInt);
+                resolve('Invalid user limit: ' + maxInt);
                 return;
             }
 
+            userCount = voiceChannel.members.size;
             if (maxInt > 0 && maxInt < userCount) {
-                reject('User limit is lower than the current user count');
+                resolve('User limit is lower than the current user count');
                 return;
             }
 

@@ -1,29 +1,20 @@
 const Discord = require('discord.js');
 const fs = require('fs');
-const { prefix, categories } = require('../config.json');
+const { prefix } = require('../config.json');
 
 function canActOn(channel) {
-    let guildId,
-        parentId,
-        guildCategories;
+    let perms;
 
     if (channel.type === 'dm') {
         return true;
     }
 
-    guildId = channel.guild.id;
-    parentId = channel.parentID;
-    guildCategories = categories[guildId];
-
-    if (!guildCategories) {
+    if (!channel.parent) {
         return false;
     }
 
-    if(!parentId || guildCategories.indexOf(parentId) === -1) {
-        return false;
-    }
-
-    return channel.type === 'text';
+    perms = channel.parent.permissionsFor(channel.client.user);
+    return perms.has('MANAGE_CHANNELS') && perms.has('CONNECT') && channel.type === 'text';
 }
 
 module.exports = {

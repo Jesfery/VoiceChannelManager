@@ -1,25 +1,19 @@
 const utils = require('../utils.js');
-const { categories } = require('../config.json');
 
 /**
- * Checks to see if the voice channel is a child of one of the configured categories
+ * Checks to see if the voice channel is a child of a category we can manage
  * 
  * @param {VoiceChannel} channel the voice channel
  */
 function canActOn(channel) {
-    let guildId = channel.guild.id,
-        parentId = channel.parentID,
-        guildCategories = categories[guildId];
+    let perms;
 
-    if (!guildCategories) {
+    if (!channel.parent) {
         return false;
     }
 
-    if(!parentId || guildCategories.indexOf(parentId) === -1) {
-        return false;
-    }
-
-    return channel.type === 'voice';
+    perms = channel.parent.permissionsFor(channel.client.user);
+    return perms.has('MANAGE_CHANNELS') && perms.has('CONNECT') && channel.type === 'voice';
 }
 
 /**
@@ -142,8 +136,14 @@ module.exports = {
         //Update channel state at startup
         client.guilds.forEach(guild => {
             guild.channels.filter(channel => {
-                let guildCategories = categories[guild.id];
-                return guildCategories && guildCategories.indexOf(channel.id) !== -1;
+                let perms;
+
+                if (channel.type !== 'category') {
+                    return false;
+                }
+                
+                perms = channel.permissionsFor(client.user);
+                return perms.has('MANAGE_CHANNELS') && perms.has('CONNECT');
             }).forEach(category => {
                 manageChannels(category);
             });
