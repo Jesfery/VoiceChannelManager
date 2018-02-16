@@ -42,7 +42,12 @@ module.exports = {
                 return;
             }
 
-            voiceChannel.members.forEach(function (member) {
+            if (voiceChannel.userLimit === maxInt) {
+                resolve('User limit is already ' + maxInt);
+                return;
+            }
+
+            voiceChannel.members.forEach(member => {
                 if (member.id !== message.member.id) {
                     targetUsers.push(member);
                 }
