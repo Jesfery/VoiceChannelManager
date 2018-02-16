@@ -92,7 +92,8 @@ function manageChannels(category) {
  */
 function getChannelName(channel, index) {
     let activities = {},
-        max = 0, activityName, channelName;
+        max = 0,
+        activityName, channelName;
 
     channel.members.forEach(member => {
         let activity = utils.get(member, 'presence.activity'),
@@ -102,7 +103,7 @@ function getChannelName(channel, index) {
             if (activities[name] !== undefined) {
                 activities[name]++;
             } else {
-                activities[name] = 1;                
+                activities[name] = 1;
             }
         }
 
@@ -131,7 +132,7 @@ function getChannelName(channel, index) {
 }
 
 module.exports = {
-    init: function(client) {
+    init: function (client) {
 
         //Update channel state at startup
         client.guilds.forEach(guild => {
@@ -141,7 +142,7 @@ module.exports = {
                 if (channel.type !== 'category') {
                     return false;
                 }
-                
+
                 perms = channel.permissionsFor(client.user);
                 return perms.has('MANAGE_CHANNELS') && perms.has('CONNECT');
             }).forEach(category => {
@@ -156,27 +157,27 @@ module.exports = {
                 newCategory;
 
             //If a user enters of leaves a configured category, update it.
-            if(oldUserChannel !== undefined && canActOn(oldUserChannel) && (newUserChannel === undefined || !newUserChannel.equals(oldUserChannel))) {
+            if (oldUserChannel !== undefined && canActOn(oldUserChannel) && (newUserChannel === undefined || !newUserChannel.equals(oldUserChannel))) {
                 oldCategoryID = oldUserChannel.parentID;
                 manageChannels(oldUserChannel.parent);
             }
 
-            if(newUserChannel !== undefined && canActOn(newUserChannel) && (oldUserChannel === undefined || !newUserChannel.equals(oldUserChannel))){
+            if (newUserChannel !== undefined && canActOn(newUserChannel) && (oldUserChannel === undefined || !newUserChannel.equals(oldUserChannel))) {
                 if (oldCategoryID !== newUserChannel.parentID) { //No need to manage the same category twice.
                     manageChannels(newUserChannel.parent);
                 }
             }
         });
-        
+
         client.on('presenceUpdate', (oldMember, newMember) => {
             let newUserActivity = utils.get(newMember, 'presence.activity'),
                 oldUserActivity = utils.get(oldMember, 'presence.activity'),
                 newUserChannel = newMember.voiceChannel;
-        
+
             if (newUserChannel && (!newUserActivity || !oldUserActivity || !newUserActivity.equals(oldUserActivity)) && canActOn(newUserChannel)) {
                 //Shouldnt be necessary to manage an entire category when the presence updates.
                 newUserChannel.setName(getChannelName(newUserChannel));
             }
-        });        
+        });
     }
 };

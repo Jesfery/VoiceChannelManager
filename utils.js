@@ -7,7 +7,7 @@
  * @return {Object} the deep property value
  */
 function get(obj, key) {
-    return key.split(".").reduce(function(o, x) {
+    return key.split(".").reduce(function (o, x) {
         return (typeof o == "undefined" || o === null) ? o : o[x];
     }, obj);
 }
@@ -40,7 +40,7 @@ function vote(subject, channel, options) {
     if (targetUsers && targetUsers.length > 0) {
         let mentions = [];
 
-        targetUsers.forEach(function (user) {
+        targetUsers.forEach(user => {
             mentions.push(user.toString());
         });
 
@@ -84,7 +84,7 @@ function vote(subject, channel, options) {
                 //Tally reactions, then resolve the vote promise with the results
                 let results = {};
 
-                selections.forEach(function(selection) {
+                selections.forEach(selection => {
                     let reaction = reactions.get(selection.emoji),
                         result = {
                             count: 0,
@@ -92,7 +92,7 @@ function vote(subject, channel, options) {
                         };
 
                     if (reaction) {
-                        reaction.users.forEach(function(user) {
+                        reaction.users.forEach(user => {
                             result.count++;
                             result.users.push(user);
                         });
