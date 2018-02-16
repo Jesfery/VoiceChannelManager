@@ -1,4 +1,5 @@
 const utils = require('../utils.js');
+let votePending = {};
 
 module.exports = {
 	name: 'setmax',
@@ -25,6 +26,11 @@ module.exports = {
                 return;
             }
         
+            if (votePending[voiceChannel.id] === true) {
+                resolve('There is already a vote pending on that channel');
+                return;
+            }
+
             if (Number.isNaN(maxInt) || maxInt < 0 || maxInt >= 100) {
                 resolve('Invalid user limit: ' + maxInt);
                 return;
@@ -43,6 +49,7 @@ module.exports = {
             });
 
             if (userCount > 1) {
+                votePending[voiceChannel.id] = true;
                 utils.vote('Set user limit of ' + voiceChannel.name + ' to ' + maxInt + '? Please vote using the reactions below.', message.channel, {
                     targetUsers: targetUsers,
                     time: 10000
@@ -56,6 +63,9 @@ module.exports = {
                     } else {
                         resolve('Request rejected by channel members');
                     }
+                    delete votePending[voiceChannel.id];
+                }).catch(() => {
+                    delete votePending[voiceChannel.id];
                 });
             } else {
                 voiceChannel.edit({
