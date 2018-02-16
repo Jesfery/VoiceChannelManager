@@ -2,10 +2,10 @@ const utils = require('../utils.js');
 let votePending = {};
 
 module.exports = {
-	name: 'setmax',
-	description: 'Set the maximum number of users that can connect to your voice channel. \'0\' will reset it.',
+    name: 'setmax',
+    description: 'Set the maximum number of users that can connect to your voice channel. \'0\' will reset it.',
     usage: 'maxUsers',
-    cooldown: 5,	
+    cooldown: 5,
     guildOnly: true,
 
     execute(message, args) {
@@ -25,7 +25,7 @@ module.exports = {
                 resolve('Cannot manage the voice channel');
                 return;
             }
-        
+
             if (votePending[voiceChannel.id] === true) {
                 resolve('There is already a vote pending on that channel');
                 return;
@@ -42,7 +42,7 @@ module.exports = {
                 return;
             }
 
-            voiceChannel.members.forEach(function(member) {
+            voiceChannel.members.forEach(function (member) {
                 if (member.id !== message.member.id) {
                     targetUsers.push(member);
                 }
@@ -75,5 +75,5 @@ module.exports = {
                 });
             }
         });
-	}
+    }
 };
