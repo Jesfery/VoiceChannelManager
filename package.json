@@ -1,6 +1,6 @@
 {
   "name": "voicechannelmanager",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "A simple discord.js bot to manage Voice Channels",
   "main": "index.js",
   "scripts": {
