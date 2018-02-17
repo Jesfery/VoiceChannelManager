@@ -79,6 +79,7 @@ module.exports = {
                 }
             }
 
+            userCount = voiceChannel.members.size;
             voiceChannel.members.forEach(member => {
                 if (member.id !== message.member.id) {
                     targetUsers.push(member);
