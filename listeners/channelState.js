@@ -44,13 +44,16 @@ function manageChannels(category) {
     promises = [];
     if (emptyVoiceChannels.size > 0) {
         emptyVoiceChannels.forEach(channel => {
+            let permissionOverwrites = category.permissionOverwrites.map(() => {});
             if (channel.id === emptyVoiceChannels.first().id) {
-                promises.push(channel.edit({
+                //Edit happens in lockPermissions. Set userLimit on channel data.
+                /*promises.push(channel.edit({
                     userLimit: 0
-                }));
+                }));*/
                 channel.userLimit = 0;
+                promises.push(channel.lockPermissions());
             } else {
-                promises.push(channel.delete('auto management'));
+                promises.push(channel.delete());
                 voiceChannels.delete(channel.id);
             }
         });
