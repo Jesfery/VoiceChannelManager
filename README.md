@@ -2,12 +2,16 @@
 
 A simple discord.js bot to manage Voice Channels.
 
-Will manage channels in any category that the bot has MANAGE_CHANNELS and CONNECT permissions
+Will manage channels in any category that the bot has MANAGE_CHANNELS, MANAGE_ROLES, MOVE_MEMBERS, VIEW_CHANNEL and CONNECT permissions for.
 
 * Updates the name of voice channels to represent the activity of the majority of members in the channel.
 * Ensures that there is always one voice channel available in the category
-* Allows for users to set the userLimit on, turn voice activation on or off for, lockdown, or boot a user from the voice channel they're connected to.
-
+* Allows for users to do the following things on the Voice Channel they are connected to
+  - Set the userLimit using the 'setmax' command
+  - Allow or disallow voice activation using the 'setvad' command
+  - Lock the channel so that only members currently in it may join using the 'lock' command
+  - Boot a user from the voice channel using the 'boot'/'kick' command
+  
 Dynamic command handling is based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
 
 ### Configuration (config.json)
