@@ -59,8 +59,13 @@ module.exports = {
                     voiceChannel.overwritePermissions(user, {
                         'CONNECT': false
                     }).then(() => {
-                        resolve('User has been kicked');    
-                    });                    
+                        let newChannel = voiceChannel.parent.children.find(channel => {
+                            return channel.type === 'voice' && channel.members.size === 0;
+                        });
+                        user.setVoiceChannel(newChannel).then(() => {
+                            resolve('User removed');
+                        });
+                    });
                 } else {
                     resolve('Request rejected by channel members');
                 }
