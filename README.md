@@ -6,7 +6,7 @@ Will manage channels in any category that the bot has MANAGE_CHANNELS and CONNEC
 
 * Updates the name of voice channels to represent the activity of the majority of members in the channel.
 * Ensures that there is always one voice channel available in the category
-* Allows for users to set the userLimit on, force/relax push to talk for, or boot a user from the voice channel they're connected to.
+* Allows for users to set the userLimit on, turn voice activation on or off for, lockdown, or boot a user from the voice channel they're connected to.
 
 Dynamic command handling is based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
 
