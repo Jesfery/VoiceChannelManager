@@ -2,7 +2,7 @@
 
 A simple discord.js bot to manage Voice Channels.
 
-Will manage channels in any category that the bot has MANAGE_CHANNELS, MANAGE_ROLES, MOVE_MEMBERS, VIEW_CHANNEL and CONNECT permissions for.
+Will manage channels in any category that the bot has MANAGE_CHANNELS, MANAGE_ROLES, MOVE_MEMBERS, VIEW_CHANNEL and CONNECT permissions in the following ways;
 
 * Updates the name of voice channels to represent the activity of the majority of members in the channel.
 * Ensures that there is always one voice channel available in the category
