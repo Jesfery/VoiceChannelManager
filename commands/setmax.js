@@ -26,11 +26,6 @@ module.exports = {
                 return;
             }
 
-            if (votePending[voiceChannel.id] === true) {
-                resolve('There is already a vote pending on that channel');
-                return;
-            }
-
             if (Number.isNaN(maxInt) || maxInt < 0 || maxInt >= 100) {
                 resolve('Invalid user limit: ' + maxInt);
                 return;
@@ -54,6 +49,11 @@ module.exports = {
             });
 
             if (userCount > 1) {
+                if (votePending[voiceChannel.id] === true) {
+                    resolve('There is already a vote pending on that channel');
+                    return;
+                }
+
                 votePending[voiceChannel.id] = true;
                 utils.vote('Set user limit of ' + voiceChannel.name + ' to ' + maxInt + '? Please vote using the reactions below.', message.channel, {
                     targetUsers: targetUsers,
