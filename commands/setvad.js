@@ -1,7 +1,7 @@
 const utils = require('../utils.js');
 let votePending = {};
 
-function doSetPtt(voiceChannel, exclude) {
+function doSetVad(voiceChannel, state, exclude) {
     let everyone,
         promise,
         perms;
@@ -25,7 +25,7 @@ function doSetPtt(voiceChannel, exclude) {
         });
 
         return voiceChannel.overwritePermissions(everyone, {
-            'USE_VAD': false
+            'USE_VAD': state === 'on'
         });
     });
 
@@ -42,20 +42,21 @@ function doSetPtt(voiceChannel, exclude) {
 }
 
 module.exports = {
-    name: 'forceptt',
-    description: 'Enforce push to talk on everyone. Optionally pass a role to allow voice activation',
-    usage: '[exclude]',
-    cooldown: 5,
+    name: 'setvad',
+    description: 'Allow or disallow Voice Activation. When disallowing, a role to exclude can be passed.',
+    usage: 'on|off [exclude]',
+    cooldown: 20,
     guildOnly: true,
 
     execute(message, args) {
         return new Promise((resolve, reject) => {
-            let exclude = args.join(' '),
-                subject = '',
+            let subject = '',
                 voiceChannel = message.member.voiceChannel,
                 targetUsers = [],
-                userCount;
-
+                userCount,
+                state = args.shift(),
+                exclude = args.join(' ');
+                
             if (voiceChannel === undefined) {
                 resolve('User not connected to a voice channel');
                 return;
@@ -66,9 +67,14 @@ module.exports = {
                 return;
             }
 
-            if (votePending[voiceChannel.id] === true) {
-                resolve('There is already a vote pending on that channel');
+            if (['on', 'off'].indexOf(state) === -1) {
+                resolve('"on" or "off" must be passed');
                 return;
+            }
+
+            //Exclude is only applicable when turning off
+            if (state !== 'off') {
+                exclude = undefined;
             }
 
             if (exclude && exclude.length > 0) {
@@ -87,14 +93,18 @@ module.exports = {
             });
 
             if (userCount > 1) {
+                if (votePending[voiceChannel.id] === true) {
+                    resolve('There is already a vote pending on that channel');
+                    return;
+                }
                 votePending[voiceChannel.id] = true;
-                utils.vote('Force push to talk for ' + voiceChannel.name + '? Please vote using the reactions below.', message.channel, {
+                utils.vote('Set voice activation "' + state + '" for ' + voiceChannel.name + '? Please vote using the reactions below.', message.channel, {
                     targetUsers: targetUsers,
                     time: 10000
                 }).then(results => {
                     if (((results.agree.count + 1) / userCount) > 0.5) { //+1 for requesting user
-                        doSetPtt(voiceChannel, exclude).then(() => {
-                            resolve('PTT enforced');
+                        doSetVad(voiceChannel, state, exclude).then(() => {
+                            resolve('Voice activation set to "' + state + '"');
                         });
                     } else {
                         resolve('Request rejected by channel members');
@@ -104,8 +114,8 @@ module.exports = {
                     delete votePending[voiceChannel.id];
                 });
             } else {
-                doSetPtt(voiceChannel, exclude).then(() => {
-                    resolve('PTT enforced');
+                doSetVad(voiceChannel, state, exclude).then(() => {
+                    resolve('Voice activation set to "' + state + '"');
                 });
             }
         });

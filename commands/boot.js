@@ -27,11 +27,6 @@ module.exports = {
                 return;
             }
 
-            if (votePending[voiceChannel.id] === true) {
-                resolve('There is already a vote pending on that channel');
-                return;
-            }
-
             if (!message.mentions || message.mentions.size === 0 || !(user = message.mentions.members.first())) {
                 resolve('No user mentioned');
                 return;
@@ -50,6 +45,10 @@ module.exports = {
                 }
             });
 
+            if (votePending[voiceChannel.id] === true) {
+                resolve('There is already a vote pending on that channel');
+                return;
+            }
             votePending[voiceChannel.id] = true;
             utils.vote(message.author.toString() + ' has requested that ' + user.toString() + ' be kicked from ' + voiceChannel.name + '? Please vote using the reactions below.', message.channel, {
                 targetUsers: targetUsers,

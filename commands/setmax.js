@@ -5,7 +5,7 @@ module.exports = {
     name: 'setmax',
     description: 'Set the maximum number of users that can connect to your voice channel. \'0\' will reset it.',
     usage: 'maxUsers',
-    cooldown: 5,
+    cooldown: 20,
     guildOnly: true,
 
     execute(message, args) {
