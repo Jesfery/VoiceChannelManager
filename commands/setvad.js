@@ -4,7 +4,8 @@ let votePending = {};
 function doSetVad(voiceChannel, state, exclude) {
     let everyone,
         promise,
-        perms;
+        perms,
+        allowVad = (state === 'on');
 
     //Reset VAD overwrites
     perms = voiceChannel.permissionOverwrites.map(overwrite => ({
@@ -18,25 +19,18 @@ function doSetVad(voiceChannel, state, exclude) {
         permissionOverwrites: perms
     });
 
-    //Set VAD off for @everyone
+    //Set VAD for all bar the excluded role
     promise = promise.then(() => {
-        everyone = voiceChannel.guild.roles.find(role => {
-            return role.name === '@everyone';
+        let promises = [];
+
+        voiceChannel.guild.roles.forEach(role => {
+            promises.push(voiceChannel.overwritePermissions(role, {
+                'USE_VAD': (exclude && exclude.id === role.id) || allowVad
+            }));
         });
 
-        return voiceChannel.overwritePermissions(everyone, {
-            'USE_VAD': state === 'on'
-        });
+        return Promise.all(promises);
     });
-
-    //Exclude role
-    if (exclude) {
-        promise = promise.then(() => {
-            return voiceChannel.overwritePermissions(exclude, {
-                'USE_VAD': true
-            });
-        });    
-    }    
 
     return promise;
 }
