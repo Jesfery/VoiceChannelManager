@@ -33,16 +33,19 @@ function doLock(voiceChannel) {
         return Promise.all(promises);
     });
 
-    //Set CONNECT off for @everyone
+    //Set CONNECT off for all roles
     promise = promise.then(() => {
-        everyone = voiceChannel.guild.roles.find(role => {
-            return role.name === '@everyone';
+        let promises = [];
+
+        voiceChannel.guild.roles.forEach(role => {
+            promises.push(voiceChannel.overwritePermissions(role, {
+                'CONNECT': false
+            }));
         });
 
-        return voiceChannel.overwritePermissions(everyone, {
-            'CONNECT': false
-        });
+        return Promise.all(promises);
     });
+
 
     return promise;
 }
