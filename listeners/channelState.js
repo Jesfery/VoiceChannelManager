@@ -102,6 +102,10 @@ function getChannelName(channel, index) {
         let activity = utils.get(member, 'presence.activity'),
             name = utils.get(activity, 'name');
 
+        if(member.user.bot) {
+            return;
+        }
+
         if (utils.get(activity, 'type') === 'STREAMING') {
             name = utils.get(activity, 'details');
         }
