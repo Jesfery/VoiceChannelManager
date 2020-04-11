@@ -1,6 +1,6 @@
 {
   "name": "voicechannelmanager",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "A simple discord.js bot to manage Voice Channels",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,6 @@
   "author": "Jesfery",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "github:hydrabolt/discord.js"
+    "discord.js": "^12.1.1"
   }
 }

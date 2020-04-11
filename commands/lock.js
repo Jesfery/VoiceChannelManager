@@ -60,12 +60,12 @@ module.exports = {
     execute(message, args) {
         return new Promise((resolve, reject) => {
             let subject = '',
-                voiceChannel = message.member.voiceChannel,
+                voiceChannel = utils.get(message, 'member.voice.channel'),
                 targetUsers = [],
                 userCount,
                 user;
 
-            if (voiceChannel === undefined) {
+            if (voiceChannel == null) {
                 resolve('User not connected to a voice channel');
                 return;
             }

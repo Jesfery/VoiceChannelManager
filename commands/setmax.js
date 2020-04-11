@@ -12,11 +12,11 @@ module.exports = {
         return new Promise((resolve, reject) => {
             let maxInt = Number.parseInt(args[0]),
                 subject = '',
-                voiceChannel = message.member.voiceChannel,
+                voiceChannel = utils.get(message, 'member.voice.channel'),
                 targetUsers = [],
                 userCount;
 
-            if (voiceChannel === undefined) {
+            if (voiceChannel == null) {
                 resolve('User not connected to a voice channel');
                 return;
             }
