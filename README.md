@@ -14,12 +14,12 @@ Will manage channels in any category that the bot has MANAGE_CHANNELS, MANAGE_RO
   
 Dynamic command handling is based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
 
-### Configuration (config.json)
+### Configuration (.env)
 
-##### "prefix"
+##### "COMMAND_PREFIX"
 
 The prefix that the command listener will respond to (default is '!')
 
-##### "token"
+##### "DISCORD_TOKEN"
 
 The app bot user token. Found in the Discord application console - https://discordapp.com/developers/applications/me/

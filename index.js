@@ -4,7 +4,7 @@
  * Dynamic command handling based on https://github.com/discordjs/guide/tree/master/code_samples/command-handling/dynamic-commands
  */
 const Discord = require('discord.js');
-const { token } = require('./config.json');
+require('dotenv').config();
 
 const commandListener = require('./listeners/command.js');
 const channelStateListener = require('./listeners/channelState.js');
@@ -17,4 +17,4 @@ client.once('ready', () => {
     console.log('Ready!');
 });
 
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);
