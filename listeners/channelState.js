@@ -183,7 +183,9 @@ function renameChannel(channel, name) {
     channelCoolDown.set('channel', channel);
 
     if (count < 3) {
-        channel.setName(name);
+        channel.setName(name).catch((e) => {
+            //Channel likely does not exist. Ignore.
+        });
     } else {
         console.log(`Queueing name '${name}' for channel: ${channelId}(${channel.name})`);
         channelCoolDown.set('name', name);
