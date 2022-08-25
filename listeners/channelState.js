@@ -153,25 +153,6 @@ function renameChannel(channel, name) {
         channelCoolDown = new Discord.Collection();
         channelCoolDown.set('count', 0);
         channelCoolDown.set('name', undefined);
-        //I'll put the timeout in the collection for now, but its not in use atm.
-        console.log(`Cooldown started for channel: ${channelId}(${channel.name})`);
-        channelCoolDown.set('timeout', setTimeout(() => {
-            let ccd = renameCoolDowns.get(channelId);
-            let queuedName = ccd.get('name');
-            if (queuedName !== undefined) {
-                ccd.get('channel').fetch()
-                    .then((queuedChannel) => {
-                        console.log(`Completing rename of channel: ${channelId}(${queuedChannel.name}). New name should be ${queuedName}`);
-                        queuedChannel.setName(queuedName).catch((e) => {
-                            //Channel likely deleted before the timeout completed. Ignore.
-                        });
-                    })
-                    .catch((e) => {
-                        //Channel likely deleted before the timeout completed. Ignore.
-                    });
-            }
-           renameCoolDowns.delete(channelId);
-        }, rateLimit));
         renameCoolDowns.set(channelId, channelCoolDown);
     } else {
         channelCoolDown = renameCoolDowns.get(channelId);
@@ -189,6 +170,27 @@ function renameChannel(channel, name) {
     } else {
         console.log(`Queueing name '${name}' for channel: ${channelId}(${channel.name})`);
         channelCoolDown.set('name', name);
+        
+        if (!channelCoolDown.get('timeout')) {
+            console.log(`Cooldown started for channel: ${channelId}(${channel.name})`);        
+            channelCoolDown.set('timeout', setTimeout(() => {
+                let ccd = renameCoolDowns.get(channelId);
+                let queuedName = ccd.get('name');
+                if (queuedName !== undefined) {
+                    ccd.get('channel').fetch()
+                        .then((queuedChannel) => {
+                            console.log(`Completing rename of channel: ${channelId}(${queuedChannel.name}). New name should be ${queuedName}`);
+                            queuedChannel.setName(queuedName).catch((e) => {
+                                //Channel likely deleted before the timeout completed. Ignore.
+                            });
+                        })
+                        .catch((e) => {
+                            //Channel likely deleted before the timeout completed. Ignore.
+                        });
+                }
+               renameCoolDowns.delete(channelId);
+            }, rateLimit));
+        }
     }
 }
 
